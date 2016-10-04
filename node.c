@@ -141,6 +141,9 @@ int main()
   write(communication_fd, hostname, HOST_NAME_MAX);
   write(communication_fd, "\n", 1);
   
+  bzero(buffer, 1024);
+  strcpy(buffer, "list ");
+  strcat(buffer, hostname);
   while(1)
   {
     // Mengisi buffer untuk komunikasi dengan 0
@@ -153,18 +156,16 @@ int main()
 
 	  if (strncmp(str,"cap",strlen("cap")) == 0) { // cap
 	  	strcpy(str,"cap multigraph dirtyconfig\n");
-	  	printf("%s\n", str);
-	  	printf("masuk 1\n");
 	  } 
 	  else if (strncmp(str,"nodes",strlen("nodes")) == 0) { // nodes
-	  	strcpy(str,"MyComputer");
-	  	printf("%s\n", str);
-	  	printf("masuk 2\n");
-	  } 
-	  else if (strncmp(str,"list MyComputer",strlen("list MyComputer")) == 0) { // list MyComputer
-	  	strcpy(str, "memory");
-	  	printf("%s\n", str);
-	  	printf("masuk 3\n");
+	  	strcpy(str,hostname);
+      write(communication_fd, str, strlen(str)+1);
+      write(communication_fd, "\n", strlen("\n")+1);
+      write(communication_fd, ".\n", 2); // .\n
+      continue;
+	  } // pakai titik
+	  else if (strncmp(str,buffer,strlen(buffer)) == 0 || strncmp(str,"list", strlen("list")) == 0) { // list MyComputer
+	  	strcpy(str, "memory\n");
 	  } 
 	  else if (strncmp(str,"config memory",strlen("config memory")) == 0) { // config memory
 	  	write(communication_fd, "graph_args --base 1024 -l 0 --upper-limit ", strlen("graph_args --base 1024 -l 0 --upper-limit ")+1);
@@ -182,8 +183,9 @@ int main()
       write(communication_fd, "free.label free\n", strlen("free.label free")+1);
       write(communication_fd, "free.draw STACK\n", strlen("free.draw STACK")+1);
       write(communication_fd, "free.info Free memory.\n", strlen("free.info Free memory.")+1);
+      write(communication_fd, ".\n", 2); // .\n
 	  	continue;
-	  } 
+	  } // pakai titik 
 	  else if (strncmp(str,"fetch memory",strlen("fetch memory")) == 0) { // fetch memory
       write(communication_fd, "used.value ", strlen("used.value "));
 	  	strcpy(str, parse_command(2));
@@ -195,19 +197,17 @@ int main()
       write(communication_fd, "\n", strlen("\n")+1); // free.value 1287498127
       write(communication_fd, ".\n", 2); // .\n
 	  	continue;
-	  } 
+	  } // pakai titik 
 	  else if (strncmp(str,"version",strlen("version")) == 0) { // version
-	  	strcpy(str, "TropicalIsland v0.0");
+	  	strcpy(str, "TropicalIsland v1.0\n");
 	  } 
 	  else if (strncmp(str,"quit", strlen("quit")) == 0) { // quit
-	  	strcpy(str, "Connection closed by foreign host\n");
+	  	strcpy(str, "\n");
       write(communication_fd, str, strlen(str));
       break;
     }
     else { // otherwise
       strcpy(str, "# Unknown command. Try cap, list, nodes, config, fetch, version or quit\n");
-      printf("%s\n", str);
-      printf("masuk 4\n");
     }
     // Mengirim response ke client
     write(communication_fd, str, strlen(str));
@@ -218,22 +218,3 @@ int main()
 
 }
 
-// // config memory
-
-// write(communication_fd, "graph_args --base 1024 -l 0 --upper-limit ", strlen("graph_args --base 1024 -l 0 --upper-limit ")+1);
-// write(communication_fd, "graph_vlabel Bytes", strlen("graph_vlabel Bytes")+1);
-// write(communication_fd, "graph_title Memory usage", strlen("graph_title Memory usage")+1);
-// write(communication_fd, "graph_category system", strlen("graph_category system")+1);
-// write(communication_fd, "graph_info This graph shows this machine memory.", strlen("graph_info This graph shows this machine memory.")+1);
-// write(communication_fd, "graph_order used free", strlen("graph_order used free")+1);
-// write(communication_fd, "used.label used", strlen("used.label used")+1);
-// write(communication_fd, "used.draw STACK", strlen("used.draw STACK")+1);
-// write(communication_fd, "used.info Used memory.", strlen("used.info Used memory.")+1);
-// write(communication_fd, "free.label free", strlen("free.label free")+1);
-// write(communication_fd, "free.draw STACK", strlen("free.draw STACK")+1);
-// write(communication_fd, "free.info Free memory.", strlen("free.info Free memory.")+1);
-
-// // fetch memory
-
-// used.value used.memory
-// free.value free.memory
