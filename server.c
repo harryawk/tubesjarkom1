@@ -96,10 +96,11 @@ char* parse_command(int tipe) {
 
 void doprocessing (int communication_fd) {
    int n;
+   unsigned long long value;
    char str[100];
    char buffer[1024];
    
-   write(communication_fd, "# munin haha at ", 17);
+   write(communication_fd, "# munin node at ", 17);
    gethostname(hostname, HOST_NAME_MAX);
    write(communication_fd, hostname, HOST_NAME_MAX);
    write(communication_fd, "\n", 1);
@@ -112,55 +113,66 @@ void doprocessing (int communication_fd) {
       bzero(str, 100);
      // Membaca request dari client
      read(communication_fd,str,100);     
-      printf("masuk\n");
-     printf("cap = %d\n", strncmp(str,"cap",strlen("cap")));
-
+     printf("task : %s\n",str);
      if (strncmp(str,"cap",strlen("cap")) == 0) { // cap
       strcpy(str,"cap multigraph dirtyconfig\n");
+      printf("HASIL : %s\n",str);
      } 
      else if (strncmp(str,"nodes",strlen("nodes")) == 0) { // nodes
       strcpy(str,hostname);
+      printf("HASIL : %s\n",str);
       write(communication_fd, str, strlen(str)+1);
       write(communication_fd, "\n", strlen("\n")+1);
-      write(communication_fd, ".\n", 2); // .\n
+      write(communication_fd, ".\n", 3);
       continue;
      } 
      else if (strncmp(str,buffer,strlen(buffer)) == 0 || strncmp(str,"list", strlen("list")) == 0) { // list MyComputer
       strcpy(str, "memory\n");
+      printf("HASIL : %s\n",str);
      } 
      else if (strncmp(str,"config memory",strlen("config memory")) == 0) { // config memory
-      write(communication_fd, "graph_args --base 1024 -l 0 --upper-limit ", strlen("graph_args --base 1024 -l 0 --upper-limit ")+1);
+      write(communication_fd, "graph_args --base 1024 -l 0 --upper-limit ", strlen("graph_args --base 1024 -l 0 --upper-limit "));
       strcpy(str, parse_command(1));
+      value = atoi(str)*1024;
+      sprintf(str, "%llu", value);
+      printf("HASIL : %s\n",str);
       write(communication_fd, str, strlen(str));
       write(communication_fd, "\n", strlen("\n"));
-      write(communication_fd, "graph_vlabel Bytes\n", strlen("graph_vlabel Bytes")+1);
-      write(communication_fd, "graph_title Memory usage\n", strlen("graph_title Memory usage")+1);
-      write(communication_fd, "graph_category system\n", strlen("graph_category system")+1);
-      write(communication_fd, "graph_info This graph shows this machine memory.\n", strlen("graph_info This graph shows this machine memory.")+1);
-      write(communication_fd, "graph_order used free\n", strlen("graph_order used free")+1);
-      write(communication_fd, "used.label used\n", strlen("used.label used")+1);
-      write(communication_fd, "used.draw STACK\n", strlen("used.draw STACK")+1);
-      write(communication_fd, "used.info Used memory.\n", strlen("used.info Used memory.")+1);
-      write(communication_fd, "free.label free\n", strlen("free.label free")+1);
-      write(communication_fd, "free.draw STACK\n", strlen("free.draw STACK")+1);
-      write(communication_fd, "free.info Free memory.\n", strlen("free.info Free memory.")+1);
-      write(communication_fd, ".\n", 2); // .\n
+      write(communication_fd, "graph_vlabel Bytes\n", strlen("graph_vlabel Bytes\n"));
+      write(communication_fd, "graph_title Memory usage\n", strlen("graph_title Memory usage\n"));
+      write(communication_fd, "graph_category system\n", strlen("graph_category system\n"));
+      write(communication_fd, "graph_info This graph shows this machine memory.\n", strlen("graph_info This graph shows this machine memory.\n"));
+      write(communication_fd, "graph_order used free\n", strlen("graph_order used free\n"));
+      write(communication_fd, "used.label used\n", strlen("used.label used\n"));
+      write(communication_fd, "used.draw STACK\n", strlen("used.draw STACK\n"));
+      write(communication_fd, "used.info Used memory.\n", strlen("used.info Used memory.\n"));
+      write(communication_fd, "free.label free\n", strlen("free.label free\n"));
+      write(communication_fd, "free.draw STACK\n", strlen("free.draw STACK\n"));
+      write(communication_fd, "free.info Free memory.\n", strlen("free.info Free memory.\n"));
+      write(communication_fd, ".\n", 2);
       continue;
      } 
      else if (strncmp(str,"fetch memory",strlen("fetch memory")) == 0) { // fetch memory
       write(communication_fd, "used.value ", strlen("used.value "));
       strcpy(str, parse_command(2));
+      value = atoi(str)*1024;
+      sprintf(str, "%llu", value);
+      printf("HASIL : %s\n",str);
       write(communication_fd, str, strlen(str));
-      write(communication_fd, "\n", strlen("\n")+1); // used.value 120933018402
+      write(communication_fd, "\n", strlen("\n")); // used.value 120933018402
       write(communication_fd, "free.value ", strlen("free.value "));
       strcpy(str, parse_command(3));
+      printf("HASIL : %s\n",str);
+      value = atoi(str)*1024;
+      sprintf(str, "%llu", value);
       write(communication_fd, str, strlen(str));
-      write(communication_fd, "\n", strlen("\n")+1); // free.value 1287498127
-      write(communication_fd, ".\n", 2); // .\n
+      write(communication_fd, "\n", strlen("\n")); // free.value 1287498127
+      write(communication_fd, ".\n", 2);
       continue;
      } 
      else if (strncmp(str,"version",strlen("version")) == 0) { // version
       strcpy(str, "TropicalIsland v1.0\n");
+      printf("HASIL : %s\n",str);
      } 
      else if (strncmp(str,"quit", strlen("quit")) == 0) { // quit
       strcpy(str, "\n");
